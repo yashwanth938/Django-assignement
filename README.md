@@ -48,7 +48,9 @@ In the models.py file, we will define the Artist and Work models
     def __str__(self):
         return self.name
 
-class Work(models.Model):
+#In client
+
+    class Work(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     work_type = models.CharField(max_length=255)
     link = models.URLField()
@@ -56,7 +58,7 @@ class Work(models.Model):
     def __str__(self):
         return f"{self.artist.name}'s {self.work_type} work"
 
-#Here, we have defined an Artist model with a name field that stores the name of the artist. We have also defined a Work model with three fields: artist (a ForeignKey to the Artist model), work_type (a CharField that stores the type of work, e.g. "YouTube" or "Instagram"), and link (a URLField that stores the link to the work). The __str__ method of the Work model returns a string representation of the work that includes the artist's name and the type of work.
+Here, we have defined an Artist model with a name field that stores the name of the artist. We have also defined a Work model with three fields: artist (a ForeignKey to the Artist model), work_type (a CharField that stores the type of work, e.g. "YouTube" or "Instagram"), and link (a URLField that stores the link to the work). The __str__ method of the Work model returns a string representation of the work that includes the artist's name and the type of work.
 
 # Create the ManyToManyField
 Since we need to link the Client and Work models with a many-to-many relationship, we will add a works field to the Client model, which is a ManyToManyField that relates to the Work model. We will also add a clients field to the Work model, which is a ManyToManyField that relates to the Client model. To do this, we will modify the models.py file of the clients and artists apps 
@@ -65,26 +67,27 @@ Since we need to link the Client and Work models with a many-to-many relationshi
 
 
 
-from django.db import models
-from django.contrib.auth.models import User
-from artists.models import Work
+    from django.db import models
+    from django.contrib.auth.models import User
+    from artists.models import Work
 
-class Client(models.Model):
-    name = models.CharField(max_length=255)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    works = models.ManyToManyField(Work, related_name='clients')
+    class Client(models.Model):
+        name = models.CharField(max_length=255)
+        user = models.ForeignKey(User, on_delete=models.CASCADE)
+        works = models.ManyToManyField(Work, related_name='clients')
 
     def __str__(self):
         return self.name
 
 
 
-from django.db import models
-from clients.models import Client
 
-class Artist(models.Model):
-    name = models.CharField(max_length=255)
-    works = models.ManyToManyField(Work, related_name='artists')
+    from django.db import models
+    from clients.models import Client
+
+    class Artist(models.Model):
+        name = models.CharField(max_length=255)
+        works = models.ManyToManyField(Work, related_name='artists')
 
     def __str__(self):
         return self.name
@@ -104,17 +107,17 @@ Next, we need to create the API endpoints to show works, integrate filtering wit
 #After installing DRF, we need to create serializers and views for the Work and Artist models. We will define these in the serializers.py and views.py files of the artists app.
 
 
-from rest_framework import serializers
-from artists.models import Work, Artist
+    from rest_framework import serializers
+    from artists.models import Work, Artist
 
-class WorkSerializer(serializers.ModelSerializer):
-    artist = serializers.ReadOnlyField(source='artist.name')
+    class WorkSerializer(serializers.ModelSerializer):
+        artist = serializers.ReadOnlyField(source='artist.name')
 
     class Meta:
         model = Work
         fields = ('id', 'artist', 'work_type', 'link')
 
-class ArtistSerializer(serializers.ModelSerializer):
+    class ArtistSerializer(serializers.ModelSerializer):
     works = WorkSerializer(many=True, read_only=True)
 
     class Meta:
@@ -124,20 +127,21 @@ class ArtistSerializer(serializers.ModelSerializer):
 
 
 
-from rest_framework import generics, filters
-from artists.models import Artist, Work
-from artists.serializers import ArtistSerializer, WorkSerializer
 
-class WorkList(generics.ListAPIView):
-    queryset = Work.objects.all()
-    serializer_class = WorkSerializer
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['artist__name']
-    ordering_fields = ['artist__name', 'work_type']
+    from rest_framework import generics, filters
+    from artists.models import Artist, Work
+    from artists.serializers import ArtistSerializer, WorkSerializer
 
-class ArtistList(generics.ListAPIView):
-    queryset = Artist.objects.all()
-    serializer_class = ArtistSerializer
+    class WorkList(generics.ListAPIView):
+        queryset = Work.objects.all()
+        serializer_class = WorkSerializer
+        filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+        search_fields = ['artist__name']
+        ordering_fields = ['artist__name', 'work_type']
+
+    class ArtistList(generics.ListAPIView):
+        queryset = Artist.objects.all()
+        serializer_class = ArtistSerializer
 
 
 
