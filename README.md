@@ -17,13 +17,12 @@ Next, we need to create the Client model which contains the name and user instan
 ##In the models.py file, we will define the Client model 
 
 
-from django.db import models
-from django.contrib.auth.models import User
+    from django.db import models
+    from django.contrib.auth.models import User
 
-class Client(models.Model):
+    class Client(models.Model):
     name = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-
     def __str__(self):
         return self.name
 
@@ -38,11 +37,12 @@ Next, we need to create the Artist and Work models. We will define these models 
 In the models.py file, we will define the Artist and Work models 
 
 
-from django.db import models
 
-from django.db import models
+    from django.db import models
+    
+    from django.db import models
 
-class Artist(models.Model):
+    class Artist(models.Model):
     name = models.CharField(max_length=255)
 
     def __str__(self):
